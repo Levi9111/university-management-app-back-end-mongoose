@@ -1,49 +1,35 @@
-import { Schema, model } from 'mongoose';
-import {
-  TAcademicSemester,
-  TMonth,
-} from '../AcademicSemester/academicSemester.interface';
+import mongoose, { Schema } from 'mongoose';
+import { SemesterRegistrationStatus } from './semesterRegistration.constant';
+import { TSemesterRegistration } from './semesterRegistration.interface';
 
-const months: TMonth[] = [
-  'January',
-  'February',
-  'March',
-  'April',
-  'May',
-  'June',
-  'July',
-  'August',
-  'September',
-  'October',
-  'November',
-  'December',
-];
-
-const academicSemesterSchema = new Schema<TAcademicSemester>(
+const semesterRegistrationSchema = new mongoose.Schema<TSemesterRegistration>(
   {
-    name: {
-      type: String,
+    academicSemester: {
+      type: Schema.Types.ObjectId,
       required: true,
+      unique: true,
+      ref: 'AcademicSemester',
     },
-    code: {
+    status: {
       type: String,
-      required: true,
+      enum: SemesterRegistrationStatus,
+      default: 'UPCOMING',
     },
-    year: {
+    startDate: {
       type: Date,
       required: true,
     },
-
-    startMonth: {
-      type: String,
+    endDate: {
+      type: Date,
       required: true,
-      enum: months,
     },
-
-    endMonth: {
-      type: String,
-      required: true,
-      enum: months,
+    minCredit: {
+      type: Number,
+      default: 3,
+    },
+    maxCredit: {
+      type: Number,
+      default: 15,
     },
   },
   {
@@ -51,7 +37,7 @@ const academicSemesterSchema = new Schema<TAcademicSemester>(
   },
 );
 
-export const AcademicSemester = model<TAcademicSemester>(
-  'AcademicSemester',
-  academicSemesterSchema,
+export const SemesterRegistration = mongoose.model<TSemesterRegistration>(
+  'SemesterRegistration',
+  semesterRegistrationSchema,
 );
