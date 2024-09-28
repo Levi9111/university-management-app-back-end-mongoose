@@ -18,6 +18,7 @@ import { AcademicDepartment } from '../AcademicDepartment/academicDepartment.mod
 import { TFaculty } from '../Faculty/faculty.interface';
 import { Admin } from '../Admin/admin.model';
 import { TAdmin } from '../Admin/admin.interface';
+
 const createStudentIntoDB = async (password: string, payload: TStudent) => {
   // create a user object
   const userData: Partial<TUser> = {};
