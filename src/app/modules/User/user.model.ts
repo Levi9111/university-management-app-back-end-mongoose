@@ -2,6 +2,7 @@ import { Schema, model } from 'mongoose';
 import { TUser, UserModel } from './user.interface';
 import bcrypt from 'bcrypt';
 import config from '../../config';
+import { UserStatus } from './user.constant';
 
 const userSchema = new Schema<TUser, UserModel>(
   {
@@ -10,10 +11,19 @@ const userSchema = new Schema<TUser, UserModel>(
       required: true,
       unique: true,
     },
+    email: {
+      type: String,
+      required: [true, 'Email is required'],
+      unique: true,
+      match: [
+        /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/,
+        'Please fill a valid email address',
+      ],
+    },
     password: {
       type: String,
       required: true,
-      selected: 0,
+      select: 0,
     },
     needsPasswordChange: {
       type: Boolean,
@@ -29,7 +39,7 @@ const userSchema = new Schema<TUser, UserModel>(
 
     status: {
       type: String,
-      enum: ['in-progress', 'blocked'],
+      enum: UserStatus,
       default: 'in-progress',
     },
     isDeleted: {

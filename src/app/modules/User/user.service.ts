@@ -18,6 +18,7 @@ import { AcademicDepartment } from '../AcademicDepartment/academicDepartment.mod
 import { TFaculty } from '../Faculty/faculty.interface';
 import { Admin } from '../Admin/admin.model';
 import { TAdmin } from '../Admin/admin.interface';
+import { verifyToken } from '../Auth/auth.utils';
 
 const createStudentIntoDB = async (password: string, payload: TStudent) => {
   // create a user object
@@ -28,6 +29,7 @@ const createStudentIntoDB = async (password: string, payload: TStudent) => {
 
   //set student role
   userData.role = 'student';
+  userData.email = payload.email;
 
   const admissionSemester = await AcademicSemester.findById(
     payload.admissionSemester,
@@ -75,8 +77,9 @@ const createFacultyIntoDB = async (password: string, payload: TFaculty) => {
   //if password is not given , use deafult password
   userData.password = password || (config.default_password as string);
 
-  //set student role
+  //set faculty role
   userData.role = 'faculty';
+  userData.email = payload.email;
 
   // find academic department info
   const academicDepartment = await AcademicDepartment.findById(
@@ -131,8 +134,9 @@ const createAdminIntoDB = async (password: string, payload: TAdmin) => {
   //if password is not given , use deafult password
   userData.password = password || (config.default_password as string);
 
-  //set student role
+  //set admin role
   userData.role = 'admin';
+  userData.email = payload.email;
 
   const session = await mongoose.startSession();
 
@@ -170,8 +174,46 @@ const createAdminIntoDB = async (password: string, payload: TAdmin) => {
   }
 };
 
+const changeStatus = async (
+  id: string,
+  payload: {
+    status: string;
+  },
+) => {
+  const result = await User.findByIdAndUpdate(id, payload, {
+    new: true,
+  });
+
+  return result;
+};
+
+const getMe = async (userId: string, role: string) => {
+  let result = null;
+
+  if (role === 'student') {
+    result = await Student.findOne({ id: userId })
+      .populate('user')
+      .populate('admissionSemester')
+      .populate('academicDepartment');
+  }
+
+  if (role === 'admin') {
+    result = await Admin.findOne({ id: userId }).populate('user');
+  }
+
+  if (role === 'faculty') {
+    result = await Faculty.findOne({ id: userId })
+      .populate('user')
+      .populate('academicDepartment');
+  }
+
+  return result;
+};
+
 export const UserServices = {
   createStudentIntoDB,
   createFacultyIntoDB,
   createAdminIntoDB,
+  changeStatus,
+  getMe,
 };

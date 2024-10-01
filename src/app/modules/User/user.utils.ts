@@ -34,7 +34,6 @@ export const generateStudentId = async (payload: TAcademicSemester) => {
     lastStudentYear === currentYear
   ) {
     currentId = lastStudentId.substring(6);
-    console.log(currentId);
   }
 
   let incrementId = (Number(currentId) + 1).toString().padStart(4, '0');

@@ -1,9 +1,10 @@
-import httpStatus from 'http-status';
+import httpStatus, { NOT_FOUND } from 'http-status';
 
 import { NextFunction, Request, Response } from 'express';
 import sendResponse from '../../utils/sendResponse';
 import { UserServices } from './user.service';
 import { catchAsync } from '../../utils/catchAsync';
+import AppError from '../../errors/AppError';
 
 const createStudent = catchAsync(async (req, res) => {
   const { password, student: studentData } = req.body;
@@ -44,8 +45,36 @@ const createAdmin = catchAsync(async (req, res) => {
   });
 });
 
+const changeStatus = catchAsync(async (req, res) => {
+  const { id } = req.params;
+
+  const result = await UserServices.changeStatus(id, req.body);
+
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: `Status Updated succesfully`,
+    data: result,
+  });
+});
+
+const getMe = catchAsync(async (req, res) => {
+  const { userId, role } = req.user;
+
+  const result = await UserServices.getMe(userId, role);
+
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: `${role} retrieved succesfully`,
+    data: result,
+  });
+});
+
 export const UserControllers = {
   createStudent,
   createFaculty,
   createAdmin,
+  changeStatus,
+  getMe,
 };
