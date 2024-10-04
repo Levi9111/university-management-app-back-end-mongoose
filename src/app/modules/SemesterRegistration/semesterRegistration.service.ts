@@ -71,9 +71,10 @@ const getAllSemesterRegistrationsFromDB = async (
     .paginate()
     .fields();
 
+  const meta = await semesterRegistrationQuery.countTotal();
   const result = await semesterRegistrationQuery.modelQuery;
 
-  return result;
+  return { meta, result };
 };
 
 const updateSemesterRegistrationIntoDB = async (
@@ -119,15 +120,12 @@ const updateSemesterRegistrationIntoDB = async (
     );
   }
 
-  const result = await SemesterRegistration.findByIdAndUpdate(
-    id,
-    { payload },
-    {
-      new: true,
-      runValidators: true,
-    },
-  );
+  const result = await SemesterRegistration.findByIdAndUpdate(id, payload, {
+    new: true,
+    runValidators: true,
+  });
 
+  console.log({ result, payload });
   return result;
 };
 

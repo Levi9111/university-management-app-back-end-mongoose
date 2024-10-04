@@ -12,16 +12,18 @@ import {
   generateStudentId,
 } from './user.utils';
 import AppError from '../../errors/AppError';
-import httpStatus from 'http-status';
+import httpStatus, { NOT_FOUND } from 'http-status';
 import { Faculty } from '../Faculty/faculty.model';
 import { AcademicDepartment } from '../AcademicDepartment/academicDepartment.model';
 import { TFaculty } from '../Faculty/faculty.interface';
 import { Admin } from '../Admin/admin.model';
 import { TAdmin } from '../Admin/admin.interface';
 import { verifyToken } from '../Auth/auth.utils';
+import { sendImageToCloudinary } from '../../utils/sendImageToCloudinary';
 
 const createStudentIntoDB = async (password: string, payload: TStudent) => {
   // create a user object
+
   const userData: Partial<TUser> = {};
 
   //if password is not given , use deafult password
@@ -34,6 +36,21 @@ const createStudentIntoDB = async (password: string, payload: TStudent) => {
   const admissionSemester = await AcademicSemester.findById(
     payload.admissionSemester,
   );
+
+  if (!admissionSemester) {
+    throw new AppError(NOT_FOUND, 'Admission Semester not found');
+  }
+
+  // find Department
+  const academicDepartment = await AcademicDepartment.findById(
+    payload.academicDepartment,
+  );
+
+  if (!academicDepartment) {
+    throw new AppError(NOT_FOUND, 'Academic department not found');
+  }
+
+  payload.academicFaculty = academicDepartment.academicFaculty;
 
   const session = await mongoose.startSession();
 
@@ -87,8 +104,10 @@ const createFacultyIntoDB = async (password: string, payload: TFaculty) => {
   );
 
   if (!academicDepartment) {
-    throw new AppError(400, 'Academic department not found');
+    throw new AppError(NOT_FOUND, 'Academic department not found');
   }
+
+  payload.academicFaculty = academicDepartment.academicFaculty;
 
   const session = await mongoose.startSession();
 
